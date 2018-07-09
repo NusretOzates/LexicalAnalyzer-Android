@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <ProgressBar
+        android:id="@+id/progressBar1"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="164dp"
+        android:layout_above="@id/linear"
+
+
+        android:layout_alignParentStart="true"
+        android:layout_below="@id/spinner"
+        android:layout_marginBottom="22dp"
+        android:layout_marginTop="54dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp" />
+
+    <EditText
+        android:id="@+id/textView1"
+        style="@style/Widget.AppCompat.AutoCompleteTextView"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:ems="10"
+        android:hint="@string/your_speech_here"
+        android:inputType="text|textMultiLine|textImeMultiLine"
+        android:lineSpacingExtra="8sp"
+        android:textAlignment="viewStart"
+        android:layout_above="@id/spinner"
+        android:visibility="visible" />
+
+    <Spinner
+        android:id="@+id/spinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+
+        android:layout_centerVertical="true" />
+
+    <LinearLayout
+        android:id="@+id/linear"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true">
+        <Button
+            android:id="@+id/analyzebttn"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/toggleButton1"
+            android:layout_alignStart="@+id/textView1"
+            android:layout_weight="1"
+            android:text="@string/analyze"
+            android:textStyle="bold" />
+
+        <ToggleButton
+            android:id="@+id/toggleButton1"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignEnd="@+id/textView1"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="24dp"
+            android:layout_weight="1"
+            android:checked="false"
+            android:text="@string/togglebutton"
+            android:textOff="@string/record"
+            android:textOn="@string/finish"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/Refresh"
+            android:layout_width="100dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/analyzebttn"
+            android:layout_centerHorizontal="true"
+            android:layout_weight="1"
+            android:text="@string/refresh"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+
+</RelativeLayout>
