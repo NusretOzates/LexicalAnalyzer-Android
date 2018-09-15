@@ -4,7 +4,7 @@
     <string name="your_speech_here">Your Speech Here...</string>
     <string name="record">RECORD</string>
     <string name="finish">FINISH</string>
-    <string name="analyze">Ana</string>
+    <string name="analyze">Analyze</string>
     <string name="refresh">Refresh</string>
     <string name="textview">TextView</string>
     <string-array name="dictionairies">
