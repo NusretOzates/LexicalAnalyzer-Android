@@ -3,7 +3,7 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 27
     defaultConfig {
-        applicationId "com.example.nusret.ifoundthisoninternet"
+        applicationId "com.lexicalanalyzer.nusret.analyzer"
         minSdkVersion 22
         targetSdkVersion 27
         versionCode 1
@@ -34,4 +34,5 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.0'
     implementation group: 'com.google.guava', name: 'guava', version: '23.5-android'
     implementation 'com.android.support:recyclerview-v7:27.1.1'
+    implementation 'com.android.support:cardview-v7:27.1.1'
 }

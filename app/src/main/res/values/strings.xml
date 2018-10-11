@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Analyze It!</string>
+    <string name="app_name">Lexical Analyzer</string>
     <string name="togglebutton">ON</string>
     <string name="your_speech_here">Your Speech Here...</string>
     <string name="record">RECORD</string>
