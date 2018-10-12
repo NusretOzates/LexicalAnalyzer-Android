@@ -229,7 +229,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                         @Override
                         public void onClick(View v) {
                             toAnalyze.putExtra("DictionarySelect", 5);
-                            readEditTextForAcademicCollocationList();
+                            readEditTextStringSet(matchedacademic);
                             getReadyForAcademicCollocation(toAnalyze);
                         }
                     });
@@ -239,7 +239,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
                         @Override
                         public void onClick(View v) {
                             toAnalyze.putExtra("DictionarySelect", 6);
-                            readEditTextForDiscourseConnectors();
+                            readEditTextStringSet(matcheddiscourse);
                             getReadyForDiscourseConnectors(toAnalyze);
                         }
                     });
@@ -268,7 +268,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         Gson gsonn = new Gson();
         String gsonWords = gsonn.toJson(matchedacademicwordlistwords);
         String offlist = gsonn.toJson(wordsetlist);
-        i.putExtra("words_as_string", gsonWords);
+        i.putExtra("MatchedList", gsonWords);
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
@@ -794,7 +794,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
 
     }
 
-    private void readEditTextForAcademicCollocationList() {
+    private void readEditTextStringSet(Set<String> matched) {
         String text = returnedText.getText().toString().toLowerCase();
         String[] words = text.split("[^A-Za-z]+");
         numberofwords = words.length;
@@ -802,7 +802,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         numberofuniqueswords = wordset.size();
         for (String a : aclwordsList) {
             if (text.contains(a)) {
-                matchedacademic.add(a);
+                matched.add(a);
                 text = text.replace(a, "");
             }
         }
@@ -810,21 +810,6 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         uniquewords.addAll(Arrays.asList(an));
     }
 
-    private void readEditTextForDiscourseConnectors() {
-        String text = returnedText.getText().toString().toLowerCase();
-        String[] words = text.split("[^A-Za-z]+");
-        numberofwords = words.length;
-        wordset.addAll(Arrays.asList(words));
-        numberofuniqueswords = wordset.size();
-        for (String a : discoursewordslist) {
-            if (text.contains(a)) {
-                matcheddiscourse.add(a);
-                text = text.replace(a, "");
-            }
-        }
-        String[] an = text.split("[^A-Za-z]+");
-        uniquewords.addAll(Arrays.asList(an));
-    }
 
     //region All about voice recording
     @Override

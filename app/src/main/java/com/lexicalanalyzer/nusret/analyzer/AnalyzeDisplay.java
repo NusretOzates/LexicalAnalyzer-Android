@@ -24,13 +24,9 @@ import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.NavigableSet;
 
 public class AnalyzeDisplay extends AppCompatActivity {
-
-    //ArraList for NewGSL matched words
-    ArrayList<String> matchedWords1 = new ArrayList<>();
 
     TextView matchedTexts;
     PieChart chart;
@@ -63,16 +59,12 @@ public class AnalyzeDisplay extends AppCompatActivity {
 
         chart = findViewById(R.id.chart);
 
-        //From json to ArrayList
 
-        type = new TypeToken<List<Word>>() {
-        }.getType();
-
+        //Offlist words defined in switch because offlist words could come as String or Word
 
         numberofwords = getIntent().getIntExtra("NumberofWords", 0);
         Uniquewordsnumber = getIntent().getIntExtra("Uniquewordsnumber", 0);
         offlist = getIntent().getStringExtra("OffSet");
-        offlistwords = son.fromJson(offlist, type);
         matchedlist = getIntent().getStringExtra("MatchedList");
 
         whichdic = getIntent().getIntExtra("DictionarySelect", 0);
@@ -80,42 +72,49 @@ public class AnalyzeDisplay extends AppCompatActivity {
             case (1): {
                 type = new TypeToken<ArrayList<Word>>() {
                 }.getType();
+                offlistwords = son.fromJson(offlist, type);
                 getChart("New GSL");
                 break;
             }
             case (2): {
                 type = new TypeToken<ArrayList<Word>>() {
                 }.getType();
+                offlistwords = son.fromJson(offlist, type);
                 getChart("Academic Vocabulary List");
                 break;
             }
             case (3): {
                 type = new TypeToken<ArrayList<Word>>() {
                 }.getType();
+                offlistwords = son.fromJson(offlist, type);
                 getChart("NGSL");
                 break;
             }
             case (4): {
                 type = new TypeToken<ArrayList<Word>>() {
                 }.getType();
+                offlistwords = son.fromJson(offlist, type);
                 getChart("Academic Word List");
                 break;
             }
             case (5): {
                 type = new TypeToken<ArrayList<String>>() {
                 }.getType();
+                offliststrings = son.fromJson(offlist, type);
                 AcademicCollocation();
                 break;
             }
             case (6): {
                 type = new TypeToken<ArrayList<String>>() {
                 }.getType();
+                offliststrings = son.fromJson(offlist, type);
                 DiscorseConnectors();
                 break;
             }
             case (7): {
                 type = new TypeToken<ArrayList<Word>>() {
                 }.getType();
+                offlistwords = son.fromJson(offlist, type);
                 getChart("Phrasal Verbs");
             }
 
@@ -127,7 +126,7 @@ public class AnalyzeDisplay extends AppCompatActivity {
         matchedTexts.setText("");
 
         int size = list.size();
-        String text = "   You used total " + numberofwords + " words and " + Uniquewordsnumber + " unique words. " + "\n   You have " + size + dicname;
+        String text = "   You used total " + numberofwords + " words and " + Uniquewordsnumber + " unique words. " + "\n   You have " + size + "  " + dicname;
         matchedTexts.setText(text);
 
         final ArrayList<PieEntry> values = new ArrayList<>();
@@ -166,7 +165,7 @@ public class AnalyzeDisplay extends AppCompatActivity {
         chart.setHoleColor(Color.WHITE);
         chart.setTransparentCircleRadius(31f);
         chart.animateX(1000, Easing.EasingOption.EaseInOutCubic);
-        chart.setCenterText("   You use " + size + dicname + " Total used unique words " + Uniquewordsnumber);
+        chart.setCenterText("   You use " + size + " " + dicname + " Total used unique words " + Uniquewordsnumber);
         chart.setCenterTextSize(15f);
         chart.setDrawEntryLabels(false);
         chart.setEntryLabelColor(Color.BLACK);
