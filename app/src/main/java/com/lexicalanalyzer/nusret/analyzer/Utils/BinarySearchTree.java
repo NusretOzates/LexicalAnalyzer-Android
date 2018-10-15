@@ -1,4 +1,4 @@
-package com.lexicalanalyzer.nusret.analyzer;
+package com.lexicalanalyzer.nusret.analyzer.Utils;
 
 import java.util.HashSet;
 import java.util.Set;

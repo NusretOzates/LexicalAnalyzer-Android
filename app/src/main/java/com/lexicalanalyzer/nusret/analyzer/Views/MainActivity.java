@@ -1,4 +1,4 @@
-package com.lexicalanalyzer.nusret.analyzer;
+package com.lexicalanalyzer.nusret.analyzer.Views;
 
 import android.Manifest;
 import android.content.Intent;
@@ -11,6 +11,8 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,6 +25,10 @@ import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.google.gson.Gson;
+import com.lexicalanalyzer.nusret.analyzer.R;
+import com.lexicalanalyzer.nusret.analyzer.Utils.BinarySearchTree;
+import com.lexicalanalyzer.nusret.analyzer.Utils.ViewChanger;
+import com.lexicalanalyzer.nusret.analyzer.Utils.Word;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -70,6 +76,25 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     private BinarySearchTree ngslList = new BinarySearchTree();
     private BinarySearchTree awlList = new BinarySearchTree();
     private Set<Word> phrasalverbslist = new HashSet<>();
+
+    public void clearAll() {
+        numberofuniqueswords = 0;
+        numberofwords = 0;
+        uniquewords.clear();
+        offlistwordsforphrasalverbs.clear();
+        wordset.clear();
+        wordsetlist.clear();
+        aclwordsList.clear();
+        discoursewordslist.clear();
+        matchednewgslwords.clear();
+        matchedacademicwordlistwords.clear();
+        matchedNgsl.clear();
+        matchedawlList.clear();
+        matchedPhrasalVerbs.clear();
+        matchedacademic.clear();
+        matcheddiscourse.clear();
+
+    }
 
     public static String getErrorText(int errorCode) {
         String message;
@@ -272,6 +297,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
+        clearAll();
         startActivity(i);
     }
 
@@ -284,7 +310,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
-
+        clearAll();
         startActivity(i);
     }
 
@@ -296,6 +322,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
+        clearAll();
         startActivity(i);
 
     }
@@ -308,6 +335,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
+        clearAll();
         startActivity(i);
     }
 
@@ -319,6 +347,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
+        clearAll();
         startActivity(i);
     }
 
@@ -330,6 +359,8 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("OffSet", offset);
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
+
+        clearAll();
         startActivity(i);
     }
 
@@ -341,6 +372,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         i.putExtra("NumberofWords", numberofwords);
         i.putExtra("Uniquewordsnumber", numberofuniqueswords);
         i.putExtra("OffSet", offlist);
+        clearAll();
         startActivity(i);
     }
 
@@ -748,7 +780,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void readEditText(int id) {
-        String text = returnedText.getText().toString().toLowerCase();
+        String text = returnedText.getText().toString().toLowerCase().replaceAll("\\s+", " ").replaceAll("[^a-zA-Z\\s]", "");
         String[] words = text.split("[^A-Za-z]+");
         numberofwords = words.length;
         wordset.addAll(Arrays.asList(words));
@@ -781,10 +813,10 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         wordset.addAll(Arrays.asList(words));
         numberofuniqueswords = wordset.size();
         for (Word a : phrasalverbslist) {
-            if (text.contains(a.word)) {
+            if (text.contains(a.getWord())) {
                 matchedPhrasalVerbs.add(a);
             }
-            text = text.replace(a.word, "");
+            text = text.replace(a.getWord(), "");
 
         }
         String[] an = text.split("[^A-Za-z]+");
@@ -905,4 +937,28 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
         Log.i(LOG_TAG, "onEvent");
     }
     //endregion
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_menu, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case (R.id.home):
+                ViewChanger.changeView(this, 0);
+                break;
+            case (R.id.TheProject):
+                ViewChanger.changeView(this, 1);
+                break;
+            case (R.id.AboutUs):
+                ViewChanger.changeView(this, 2);
+                break;
+
+        }
+        return true;
+    }
 }

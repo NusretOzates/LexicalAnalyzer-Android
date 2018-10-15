@@ -1,4 +1,4 @@
-package com.lexicalanalyzer.nusret.analyzer;
+package com.lexicalanalyzer.nusret.analyzer.Views;
 
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,6 +21,8 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.lexicalanalyzer.nusret.analyzer.R;
+import com.lexicalanalyzer.nusret.analyzer.Utils.Word;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -207,7 +209,7 @@ public class AnalyzeDisplay extends AppCompatActivity {
                     }
                 } else {
                     for (Word a : offlistwords) {
-                        matchedTexts.append(a.word);
+                        matchedTexts.append(a.getWord());
                         matchedTexts.append("\n");
                     }
                 }

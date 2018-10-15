@@ -1,4 +1,4 @@
-package com.lexicalanalyzer.nusret.analyzer;
+package com.lexicalanalyzer.nusret.analyzer.Utils;
 
 /**
  * Created by Halil on 11.03.2018.
