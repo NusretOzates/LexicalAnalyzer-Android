@@ -780,7 +780,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void readEditText(int id) {
-        String text = returnedText.getText().toString().toLowerCase().replaceAll("\\s+", " ").replaceAll("[^a-zA-Z\\s]", "");
+        String text = returnedText.getText().toString().toLowerCase().replaceAll("\\s+", " ").replaceAll("[^a-zA-Z\\s]", "").trim();
         String[] words = text.split("[^A-Za-z]+");
         numberofwords = words.length;
         wordset.addAll(Arrays.asList(words));
@@ -807,7 +807,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void readEditTextForPhrasalVerbs() {
-        String text = returnedText.getText().toString().toLowerCase();
+        String text = returnedText.getText().toString().toLowerCase().replaceAll("\\s+", " ").replaceAll("[^a-zA-Z\\s]", "").trim();
         String[] words = text.split("[^A-Za-z]+");
         numberofwords = words.length;
         wordset.addAll(Arrays.asList(words));
@@ -827,7 +827,7 @@ public class MainActivity extends AppCompatActivity implements RecognitionListen
     }
 
     private void readEditTextStringSet(Set<String> matched) {
-        String text = returnedText.getText().toString().toLowerCase();
+        String text = returnedText.getText().toString().toLowerCase().replaceAll("\\s+", " ").replaceAll("[^a-zA-Z\\s]", "").trim();
         String[] words = text.split("[^A-Za-z]+");
         numberofwords = words.length;
         wordset.addAll(Arrays.asList(words));

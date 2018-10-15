@@ -189,7 +189,7 @@ public class AnalyzeDisplay extends AppCompatActivity {
                 matchedTexts.setText("");
                 typeofwords = values.get(pos).getLabel();
                 Toast.makeText(AnalyzeDisplay.this, typeofwords, Toast.LENGTH_SHORT).show();
-                String text = "   Words from " + typeofwords + "\n";
+                String text = "   Words from " + typeofwords;
                 matchedTexts.setText(text);
                 NavigableSet<String> set = wordsmulti.keySet();
 
@@ -209,8 +209,7 @@ public class AnalyzeDisplay extends AppCompatActivity {
                     }
                 } else {
                     for (Word a : offlistwords) {
-                        matchedTexts.append(a.getWord());
-                        matchedTexts.append("\n");
+                        matchedTexts.append("\n" + "   " + a.getWord());
                     }
                 }
             }
