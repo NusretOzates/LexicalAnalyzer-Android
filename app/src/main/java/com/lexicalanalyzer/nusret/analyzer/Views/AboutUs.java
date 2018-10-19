@@ -4,23 +4,19 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.lexicalanalyzer.nusret.analyzer.R;
 import com.lexicalanalyzer.nusret.analyzer.Utils.ViewChanger;
 
 public class AboutUs extends AppCompatActivity {
 
-    WebView aboutus;
+    TextView aboutus;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about_us);
-        aboutus = findViewById(R.id.aboutuspage);
-        aboutus.getSettings().setJavaScriptEnabled(true);
-        aboutus.loadUrl("http://www.lexicalanalyzer.com/about-us");
-
     }
 
     @Override
