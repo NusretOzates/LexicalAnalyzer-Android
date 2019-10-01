@@ -7,13 +7,13 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.support.v4.app.ActivityCompat
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.*
+import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
 import com.google.gson.Gson
 import com.lexicalanalyzer.nusret.analyzer.R
 import com.lexicalanalyzer.nusret.analyzer.Utils.BinarySearchTree
@@ -28,17 +28,21 @@ import java.util.*
 
 
 class MainActivity : AppCompatActivity(), RecognitionListener {
-    internal var numberofwords: Int = 0
-    internal var numberofuniqueswords: Int = 0
 
-    internal var uniquewords: MutableSet<String> = HashSet() // Unique offlist words!
-    internal var offlistwordsforphrasalverbs: MutableSet<Word> = HashSet()
+    //is speech listening permitted ?
+    var isPermitted = false
+
+    private var numberofwords: Int = 0
+    private var numberofuniqueswords: Int = 0
+
+    private var uniquewords: MutableSet<String> = HashSet() // Unique offlist words!
+    private var offlistwordsforphrasalverbs: MutableSet<Word> = HashSet()
 
     //EditText strings for offlist
     private var wordset: MutableSet<String> = HashSet()
-    internal var wordsetlist = HashSet<Word>()
-    internal var aclwordsList = ArrayList<String>()
-    internal var discoursewordslist = ArrayList<String>()
+    private var wordsetlist = HashSet<Word>()
+    private var aclwordsList = ArrayList<String>()
+    private var discoursewordslist = ArrayList<String>()
     private var returnedText: EditText? = null
     private var toggleButton: ToggleButton? = null
     private var progressBar: ProgressBar? = null
@@ -83,15 +87,15 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        var intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         //Reading Libraries
         Thread(Runnable {
             readNewGSLLibrary()
             readAcademicWordsLibrary()
             readNGSLWordLibray()
             read_AWL_Library()
-            read_Academic_Collocation_List()
-            read_Discourse_Connector_List()
+            readAcademicCollocationList()
+            readDiscourseConnectorList()
             read_Phrasal_Verbs()
         }
         ).start()
@@ -128,6 +132,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 ActivityCompat.requestPermissions(this@MainActivity,
                         arrayOf(Manifest.permission.RECORD_AUDIO),
                         REQUEST_RECORD_PERMISSION)
+
             } else {
                 progressBar!!.isIndeterminate = false
                 progressBar!!.visibility = View.INVISIBLE
@@ -146,6 +151,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                         toAnalyze.putExtra("DictionarySelect", 1)
                         readEditText(1)
                         getReadyForNewGSL(toAnalyze)
+
                     }
 
                 } else if (parent.getItemAtPosition(position) == "Academic Vocabulary List") {
@@ -300,10 +306,10 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             )
             while (true) {
                 val line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
 
-                val word = tokens[0].replace("\\s+".toRegex(), "")
-                //  String type = tokens[1].replaceAll("\\s+","");
+                //  val word = tokens[0].replace("\\s+".toRegex(), "")
+                val word = tokens[0].trimStart().trimEnd()
 
                 val new_word = Word(word)
 
@@ -319,17 +325,17 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         val reader = BufferedReader(InputStreamReader(academicwords, Charset.forName("UTF-8")))
 
 
-            while (true) {
-                val line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+        while (true) {
+            val line = reader.readLine() ?: break
+            val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
 
-                val word = tokens[0].replace("\\s+".toRegex(), "")
-                val root = tokens[1].replace("\\s+".toRegex(), "")
+            val word = tokens[0].trimStart().trimEnd()
+            val root = tokens[1].trimStart().trimEnd()
 
-                val new_word = Word(word, root)
+            val new_word = Word(word, root)
 
-                academicwordlist.insert(new_word)
-            }
+            academicwordlist.insert(new_word)
+        }
 
     }
 
@@ -348,8 +354,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 var column = 0
 
                 while (column < tokens.size) {
-                    val word = tokens[column].replace("\\s+".toRegex(), "")
-                    val root = tokens[0].replace("\\s+".toRegex(), "")
+                    val word = tokens[column].trimStart().trimEnd()
+                    val root = tokens[0].trimStart().trimEnd()
 
                     val new_word = Word(word, root)
 
@@ -373,8 +379,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             while (true) {
                 line = reader.readLine() ?: break
                 val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val root = tokens[0].replace("\\s+".toRegex(), "")
-                val word = tokens[1].replace("\\s+".toRegex(), "")
+                val root = tokens[0].trimStart().trimEnd()
+                val word = tokens[1].trimStart().trimEnd()
 
                 val new_word = Word(word, root)
                 awlList.insert(new_word)
@@ -404,18 +410,16 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         }
     }
 
-    private fun read_Academic_Collocation_List() {
-        val awlreader: InputStream
+    private fun readAcademicCollocationList() {
+        val awlreader: InputStream = resources.openRawResource(R.raw.academiccollocation)
         val reader: BufferedReader
 
-        awlreader = resources.openRawResource(R.raw.academiccollocation)
         reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
 
         try {
             while (true) {
                 val line = reader.readLine() ?: break
-                val tokens = line
-                aclwordsList.add(tokens)
+                aclwordsList.add(line)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -423,7 +427,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     }
 
-    private fun read_Discourse_Connector_List() {
+    private fun readDiscourseConnectorList() {
         val awlreader = resources.openRawResource(R.raw.discourseconnnector)
         val reader: BufferedReader
 
@@ -432,8 +436,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         try {
             while (true) {
                 val line = reader.readLine() ?: break
-                val tokens = line
-                discoursewordslist.add(tokens)
+                discoursewordslist.add(line)
             }
         } catch (e: IOException) {
             e.printStackTrace()
@@ -504,18 +507,15 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        var isPermitted = false
+
         if (requestCode == REQUEST_RECORD_PERMISSION) {
             for (i in grantResults.indices) {
-                val permission = permissions[i]
-
                 isPermitted = grantResults[i] == PackageManager.PERMISSION_GRANTED
 
                 if (grantResults[i] == PackageManager.PERMISSION_DENIED) {
                     returnedText!!.setText("Permission Denied")
                 }
             }
-
             if (isPermitted) {
                 speech!!.startListening(intent)
             }
@@ -532,6 +532,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     override fun onReadyForSpeech(bundle: Bundle) {
         Log.i(LOG_TAG, "onReadyForSpeech")
+        Toast.makeText(this, "Ready For Speech", Toast.LENGTH_SHORT).show()
     }
 
     override fun onBeginningOfSpeech() {
@@ -539,13 +540,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         Log.i(LOG_TAG, "onBeginningOfSpeech")
         progressBar!!.isIndeterminate = false
         progressBar!!.max = 10
+        Toast.makeText(this, "Speech Begin", Toast.LENGTH_SHORT).show()
     }
 
     override fun onRmsChanged(v: Float) {
         Log.i(LOG_TAG, "onRmsChanged: $v")
         progressBar!!.progress = v.toInt()
-
-
     }
 
     override fun onBufferReceived(bytes: ByteArray) {
@@ -556,6 +556,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         Log.i(LOG_TAG, "onEndOfSpeech")
         progressBar!!.isIndeterminate = true
         toggleButton!!.isChecked = false
+        Toast.makeText(this, "Speech ended", Toast.LENGTH_SHORT).show()
     }
 
     override fun onError(i: Int) {
@@ -563,6 +564,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         Log.d(LOG_TAG, "FAILED $errorMessage")
         Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show()
         toggleButton!!.isChecked = false
+        Toast.makeText(this, "There is an error : $errorMessage", Toast.LENGTH_SHORT).show()
     }
 
     override fun onResults(bundle: Bundle) {
@@ -571,9 +573,9 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         val text: String
         text = matches!![0].replace("artı", "+").replace("eksi", "-").replace("noktalı virgül", ";").replace("virgül", ",")
-                .replace("çift nokta", ":").replace("nokta",".").replace("soru işareti","?")
-                .replace("Parantez aç","(").replace("parantez kapat",")").replace("ünlem","!").replace("eğik çizgi","/")
-                .replace("satır başı","\n   ").replace("Satır başı","\n   ")
+                .replace("çift nokta", ":").replace("nokta", ".").replace("soru işareti", "?")
+                .replace("Parantez aç", "(").replace("parantez kapat", ")").replace("ünlem", "!").replace("eğik çizgi", "/")
+                .replace("satır başı", "\n   ").replace("Satır başı", "\n   ")
         returnedText!!.append(text)
     }
 
@@ -622,4 +624,5 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             return message
         }
     }
+
 }

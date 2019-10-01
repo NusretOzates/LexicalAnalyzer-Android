@@ -1,12 +1,11 @@
 package com.lexicalanalyzer.nusret.analyzer.Views
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.text.Html
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.TextView
-
+import androidx.appcompat.app.AppCompatActivity
 import com.lexicalanalyzer.nusret.analyzer.R
 import com.lexicalanalyzer.nusret.analyzer.Utils.ViewChanger
 
