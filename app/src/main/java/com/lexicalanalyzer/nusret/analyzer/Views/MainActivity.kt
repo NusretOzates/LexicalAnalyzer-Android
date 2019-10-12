@@ -14,20 +14,25 @@ import android.view.View
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
+import com.google.firebase.storage.FirebaseStorage
 import com.google.gson.Gson
 import com.lexicalanalyzer.nusret.analyzer.R
 import com.lexicalanalyzer.nusret.analyzer.Utils.BinarySearchTree
 import com.lexicalanalyzer.nusret.analyzer.Utils.ViewChanger
 import com.lexicalanalyzer.nusret.analyzer.Utils.Word
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStream
-import java.io.InputStreamReader
+import java.io.*
 import java.nio.charset.Charset
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), RecognitionListener {
+
+
+    var storage = FirebaseStorage.getInstance()
+
+    var baseReferenceForFiles = storage.reference
+
 
     //is speech listening permitted ?
     var isPermitted = false
@@ -116,7 +121,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         speech = SpeechRecognizer.createSpeechRecognizer(this)
         Log.i(LOG_TAG, "isRecognitionAvailable: " + SpeechRecognizer.isRecognitionAvailable(this))
         speech!!.setRecognitionListener(this)
-        val language = "tr-TR"
+        val language = "en-US"
 
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, language)
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE, language)
@@ -202,6 +207,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
             }
         }
+
     }
 
     //To Send found AcademicWordList words,unique words and all words and start analyze
@@ -321,21 +327,36 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     //CSV to BinarySearchTree
     private fun readAcademicWordsLibrary() {
-        val academicwords = resources.openRawResource(R.raw.academicwords)
-        val reader = BufferedReader(InputStreamReader(academicwords, Charset.forName("UTF-8")))
 
 
-        while (true) {
-            val line = reader.readLine() ?: break
-            val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+        var academicWordDirectory = baseReferenceForFiles.child("Academic Word List")
 
-            val word = tokens[0].trimStart().trimEnd()
-            val root = tokens[1].trimStart().trimEnd()
+        academicWordDirectory.listAll()
+                .addOnSuccessListener { listResult ->
 
-            val new_word = Word(word, root)
 
-            academicwordlist.insert(new_word)
-        }
+                    listResult.items.forEach { item ->
+                        // All the items under listRef.
+                        var file = File.createTempFile(item.name, "csv")
+                        var fileRef = academicWordDirectory.child(item.name)
+                        fileRef.getFile(file).addOnSuccessListener {
+                            file.readLines().forEach { s ->
+                                val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+
+                                val word = tokens[1].trimStart().trimEnd()
+                                val root = tokens[0].trimStart().trimEnd()
+
+                                val newWord = Word(word, root)
+
+                                academicwordlist.insert(newWord)
+                            }
+
+                        }
+                    }
+                }
+                .addOnFailureListener {
+                    // Uh-oh, an error occurred!
+                }
 
     }
 
@@ -389,10 +410,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     }
 
     private fun read_Phrasal_Verbs() {
-        val awlreader: InputStream
+
+        val awlreader: InputStream = resources.openRawResource(R.raw.frequentphrasalverbs)
+
+
         val reader: BufferedReader
 
-        awlreader = resources.openRawResource(R.raw.frequentphrasalverbs)
         reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
 
         try {
@@ -458,7 +481,6 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
                 0 -> ngslList.find(word, matchedNgsl, wordsetlist)
                 1 -> {
                     newGslList.find(word, matchednewgslwords, wordsetlist)
-                    academicwordlist.find(word, matchedacademicwordlistwords, wordsetlist)
                 }
                 2 -> academicwordlist.find(word, matchedacademicwordlistwords, wordsetlist)
                 3 -> awlList.find(word, matchedawlList, wordsetlist)

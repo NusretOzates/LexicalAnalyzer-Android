@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "236290721373",
+    "firebase_url": "https://lexicalanalyzer-android.firebaseio.com",
+    "project_id": "lexicalanalyzer-android",
+    "storage_bucket": "lexicalanalyzer-android.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:236290721373:android:b73b975f71aac9059f6fb4",
+        "android_client_info": {
+          "package_name": "com.lexicalanalyzer.nusret.analyzer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "236290721373-4p64q9jososoj19v7hoqi32ce7cbhe3q.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lexicalanalyzer.nusret.analyzer",
+            "certificate_hash": "2eff4ddea0fb7a8f4bf5f9f7f6da343eefcff7bb"
+          }
+        },
+        {
+          "client_id": "236290721373-mtohra9poob9n7ttumotvfv0hgvh7ko6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABYAyWONaLp0tpI3BteNTpeqwdXsLxzi4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "236290721373-mtohra9poob9n7ttumotvfv0hgvh7ko6.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

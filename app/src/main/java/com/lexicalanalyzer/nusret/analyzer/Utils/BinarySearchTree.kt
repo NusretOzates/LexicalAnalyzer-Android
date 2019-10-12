@@ -1,6 +1,6 @@
 package com.lexicalanalyzer.nusret.analyzer.Utils
 
-import java.util.HashSet
+import java.util.*
 
 /**
  * Created by Halil on 11.03.2018.
@@ -18,15 +18,15 @@ class BinarySearchTree {
     fun find(p_word: String, add: MutableSet<Word>, wordset: HashSet<Word>) {
         var current = root
         while (current != null) {
-            if (current.node_word.word.equals(p_word, ignoreCase = true)) {
+            current = if (current.node_word.word.equals(p_word, ignoreCase = true)) {
                 if (wordset.remove(current.node_word)) {
                     add.add(current.node_word)
                 }
                 break
             } else if (current.node_word.word.compareTo(p_word, ignoreCase = true) > 0) {
-                current = current.left
+                current.left
             } else {
-                current = current.right
+                current.right
             }
         }
     }
