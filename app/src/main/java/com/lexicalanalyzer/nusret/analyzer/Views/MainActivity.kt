@@ -328,17 +328,14 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     //CSV to BinarySearchTree
     private fun readAcademicWordsLibrary() {
 
-
-        var academicWordDirectory = baseReferenceForFiles.child("Academic Word List")
+        val academicWordDirectory = baseReferenceForFiles.child("Academic Word List")
 
         academicWordDirectory.listAll()
                 .addOnSuccessListener { listResult ->
-
-
                     listResult.items.forEach { item ->
                         // All the items under listRef.
-                        var file = File.createTempFile(item.name, "csv")
-                        var fileRef = academicWordDirectory.child(item.name)
+                        val file = File.createTempFile(item.name, "csv")
+                        val fileRef = academicWordDirectory.child(item.name)
                         fileRef.getFile(file).addOnSuccessListener {
                             file.readLines().forEach { s ->
                                 val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
@@ -422,8 +419,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             while (true) {
                 val line = reader.readLine() ?: break
                 val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val root = tokens[0].toLowerCase()
-                val word = tokens[1].toLowerCase()
+                val root = tokens[0].toLowerCase(Locale.ROOT)
+                val word = tokens[1].toLowerCase(Locale.ROOT)
 
                 val new_word = Word(word, root)
                 phrasalverbslist.add(new_word)
