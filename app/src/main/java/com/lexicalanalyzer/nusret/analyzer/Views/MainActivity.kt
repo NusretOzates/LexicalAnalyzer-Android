@@ -29,8 +29,8 @@ import kotlin.collections.ArrayList
 class MainActivity : AppCompatActivity(), RecognitionListener {
 
 
+    // Reference for Base Link
     var storage = FirebaseStorage.getInstance()
-
     var baseReferenceForFiles = storage.reference
 
 
@@ -325,9 +325,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         }
     }
 
-    //CSV to BinarySearchTree
+    //CSV to BinarySearchTree FIREBASED
     private fun readAcademicWordsLibrary() {
-
         val academicWordDirectory = baseReferenceForFiles.child("Academic Word List")
 
         academicWordDirectory.listAll()
@@ -384,33 +383,38 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         }
     }
 
+    //FIREBASED
     private fun read_AWL_Library() {
-        var line: String
-        var awlreader: InputStream
-        var reader: BufferedReader
-        var sourceList = arrayOf(R.raw.awlsublist1, R.raw.awlsublist2, R.raw.awlsublist3, R.raw.awlsublist4, R.raw.awlsublist5, R.raw.awlsublist6
-                , R.raw.awlsublist7, R.raw.awlsublist8, R.raw.awlsublist9, R.raw.awlsublist10)
+        val awlDirectory = baseReferenceForFiles.child("AWL")
+        awlDirectory.listAll()
+                .addOnSuccessListener { listResult ->
+                    listResult.items.forEach { item ->
+                        // All the items under listRef.
+                        val file = File.createTempFile(item.name, "csv")
+                        val fileRef = awlDirectory.child(item.name)
+                        fileRef.getFile(file).addOnSuccessListener {
+                            file.readLines().forEach { s ->
+                                val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
 
-        for (source in sourceList) {
-            awlreader = resources.openRawResource(source)
-            reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
-            while (true) {
-                line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val root = tokens[0].trimStart().trimEnd()
-                val word = tokens[1].trimStart().trimEnd()
+                                val word = tokens[1].trimStart().trimEnd()
+                                val root = tokens[0].trimStart().trimEnd()
 
-                val new_word = Word(word, root)
-                awlList.insert(new_word)
-            }
-        }
+                                val newWord = Word(word, root)
+
+                                awlList.insert(newWord)
+                            }
+
+                        }
+                    }
+                }
+                .addOnFailureListener {
+                    // Uh-oh, an error occurred!
+                }
     }
 
     private fun read_Phrasal_Verbs() {
 
         val awlreader: InputStream = resources.openRawResource(R.raw.frequentphrasalverbs)
-
-
         val reader: BufferedReader
 
         reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
