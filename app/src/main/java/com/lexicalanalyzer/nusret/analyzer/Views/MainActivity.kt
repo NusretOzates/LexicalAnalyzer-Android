@@ -55,6 +55,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     private val LOG_TAG = "VoiceRecognitionAct"
     private var analyze: Button? = null
+
     //Matched Words for Dictionaries
     private val matchednewgslwords = HashSet<Word>()
     private val matchedacademicwordlistwords = HashSet<Word>()
@@ -63,6 +64,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     private val matchedPhrasalVerbs = HashSet<Word>()
     private val matchedacademic = HashSet<String>()
     private val matcheddiscourse = HashSet<String>()
+
+
     //Words for Dictionaries
     private val newGslList = BinarySearchTree()
     private val academicwordlist = BinarySearchTree()
@@ -98,14 +101,18 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             readNewGSLLibrary()
             readAcademicWordsLibrary()
             readNGSLWordLibray()
-            read_AWL_Library()
+            readAwlLibrary()
             readAcademicCollocationList()
             readDiscourseConnectorList()
-            read_Phrasal_Verbs()
+            readPhrasalVerbs()
         }
         ).start()
         val secenekler = findViewById<Spinner>(R.id.spinner)
-        val adapter = ArrayAdapter.createFromResource(this@MainActivity, R.array.dictionairies, android.R.layout.simple_spinner_item)
+        val adapter = ArrayAdapter.createFromResource(
+            this@MainActivity,
+            R.array.dictionairies,
+            android.R.layout.simple_spinner_item
+        )
         adapter.setDropDownViewResource(android.R.layout.simple_dropdown_item_1line)
         secenekler.adapter = adapter
 
@@ -134,9 +141,11 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
             if (isChecked) {
                 progressBar!!.visibility = View.VISIBLE
                 progressBar!!.isIndeterminate = true
-                ActivityCompat.requestPermissions(this@MainActivity,
-                        arrayOf(Manifest.permission.RECORD_AUDIO),
-                        REQUEST_RECORD_PERMISSION)
+                ActivityCompat.requestPermissions(
+                    this@MainActivity,
+                    arrayOf(Manifest.permission.RECORD_AUDIO),
+                    REQUEST_RECORD_PERMISSION
+                )
 
             } else {
                 progressBar!!.isIndeterminate = false
@@ -150,7 +159,12 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         analyze = findViewById(R.id.analyzebttn)
         val toAnalyze = Intent(this@MainActivity, AnalyzeDisplay::class.java)
         secenekler.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>, view: View, position: Int, id: Long) {
+            override fun onItemSelected(
+                parent: AdapterView<*>,
+                view: View,
+                position: Int,
+                id: Long
+            ) {
                 if (parent.getItemAtPosition(position) == "New-GSL") {
                     analyze!!.setOnClickListener {
                         toAnalyze.putExtra("DictionarySelect", 1)
@@ -302,27 +316,35 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     //CSV to BinarySearchTree
     private fun readNewGSLLibrary() {
 
-        var res = arrayOf(R.raw.first500, R.raw.first5001000, R.raw.first10002500)
+        val newgsllibrary = baseReferenceForFiles.child("General Service List")
 
-        for (reses in res) {
-            var inputStream = resources.openRawResource(reses)
 
-            var reader = BufferedReader(
-                    InputStreamReader(inputStream, Charset.forName("UTF-8"))
-            )
-            while (true) {
-                val line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        newgsllibrary.listAll().addOnSuccessListener { result ->
 
-                //  val word = tokens[0].replace("\\s+".toRegex(), "")
-                val word = tokens[0].trimStart().trimEnd()
+            result.items.forEach { item ->
 
-                val new_word = Word(word)
+                val file = File.createTempFile(item.name, "csv")
+                val fileRef = newgsllibrary.child(item.name)
 
-                newGslList.insert(new_word)
+                fileRef.getFile(file).addOnSuccessListener {
 
+                    file.readLines().forEach { s ->
+
+                        val tokens =
+                            s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+
+                        val word = tokens[0].trimStart().trimEnd()
+
+                        val newWord = Word(word)
+
+                        newGslList.insert(newWord)
+
+                    }
+
+                }
             }
         }
+
     }
 
     //CSV to BinarySearchTree FIREBASED
@@ -330,146 +352,180 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
         val academicWordDirectory = baseReferenceForFiles.child("Academic Word List")
 
         academicWordDirectory.listAll()
-                .addOnSuccessListener { listResult ->
-                    listResult.items.forEach { item ->
-                        // All the items under listRef.
-                        val file = File.createTempFile(item.name, "csv")
-                        val fileRef = academicWordDirectory.child(item.name)
-                        fileRef.getFile(file).addOnSuccessListener {
-                            file.readLines().forEach { s ->
-                                val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+            .addOnSuccessListener { listResult ->
+                listResult.items.forEach { item ->
+                    // All the items under listRef.
+                    val file = File.createTempFile(item.name, "csv")
+                    val fileRef = academicWordDirectory.child(item.name)
+                    fileRef.getFile(file).addOnSuccessListener {
+                        file.readLines().forEach { s ->
+                            val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+                                .toTypedArray()//Phrasal verb/boşluk gelirse sıçar
 
-                                val word = tokens[1].trimStart().trimEnd()
-                                val root = tokens[0].trimStart().trimEnd()
+                            val word = tokens[1].trimStart().trimEnd()
+                            val root = tokens[0].trimStart().trimEnd()
 
-                                val newWord = Word(word, root)
+                            val newWord = Word(word, root)
 
-                                academicwordlist.insert(newWord)
-                            }
-
+                            academicwordlist.insert(newWord)
                         }
+
                     }
                 }
-                .addOnFailureListener {
-                    // Uh-oh, an error occurred!
-                }
+            }
+            .addOnFailureListener {
+                // Uh-oh, an error occurred!
+            }
 
     }
 
     //CSV to BinarySearchTree
     private fun readNGSLWordLibray() {
 
-        val resourcesList = arrayOf(R.raw.first1000ngsl, R.raw.ngssecond1000, R.raw.ngslthird1000, R.raw.ngslsupplamental)
 
-        for (resource in resourcesList) {
-            val academicwords = resources.openRawResource(resource)
-            val reader = BufferedReader(InputStreamReader(academicwords, Charset.forName("UTF-8")))
-            while (true) {
-                var line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        val newgsl = baseReferenceForFiles.child("New General Service List")
 
-                var column = 0
+        newgsl.listAll().addOnSuccessListener { result ->
+            result.items.forEach { item ->
 
-                while (column < tokens.size) {
-                    val word = tokens[column].trimStart().trimEnd()
-                    val root = tokens[0].trimStart().trimEnd()
+                val file = File.createTempFile(item.name, "csv")
+                val fileRef = newgsl.child(item.name)
 
-                    val new_word = Word(word, root)
+                fileRef.getFile(file).addOnSuccessListener {
 
-                    ngslList.insert(new_word)
-                    column++
+                    file.readLines().forEach { s ->
+                        val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+                            .toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+
+                        var column = 0
+
+                        while (column < tokens.size) {
+                            val word = tokens[column].trimStart().trimEnd()
+                            val root = tokens[0].trimStart().trimEnd()
+
+                            val newWord = Word(word, root)
+
+                            ngslList.insert(newWord)
+                            column++
+                        }
+                    }
                 }
+
             }
         }
     }
 
     //FIREBASED
-    private fun read_AWL_Library() {
+    private fun readAwlLibrary() {
         val awlDirectory = baseReferenceForFiles.child("AWL")
         awlDirectory.listAll()
-                .addOnSuccessListener { listResult ->
-                    listResult.items.forEach { item ->
-                        // All the items under listRef.
-                        val file = File.createTempFile(item.name, "csv")
-                        val fileRef = awlDirectory.child(item.name)
-                        fileRef.getFile(file).addOnSuccessListener {
-                            file.readLines().forEach { s ->
-                                val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()//Phrasal verb/boşluk gelirse sıçar
+            .addOnSuccessListener { listResult ->
+                listResult.items.forEach { item ->
+                    // All the items under listRef.
+                    val file = File.createTempFile(item.name, "csv")
+                    val fileRef = awlDirectory.child(item.name)
+                    fileRef.getFile(file).addOnSuccessListener {
+                        file.readLines().forEach { s ->
+                            val tokens = s.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+                                .toTypedArray()//Phrasal verb/boşluk gelirse sıçar
 
-                                val word = tokens[1].trimStart().trimEnd()
-                                val root = tokens[0].trimStart().trimEnd()
+                            val word = tokens[1].trimStart().trimEnd()
+                            val root = tokens[0].trimStart().trimEnd()
 
-                                val newWord = Word(word, root)
+                            val newWord = Word(word, root)
 
-                                awlList.insert(newWord)
-                            }
-
+                            awlList.insert(newWord)
                         }
+
                     }
                 }
-                .addOnFailureListener {
-                    // Uh-oh, an error occurred!
-                }
+            }
+            .addOnFailureListener {
+                // Uh-oh, an error occurred!
+            }
     }
 
-    private fun read_Phrasal_Verbs() {
+    private fun readPhrasalVerbs() {
 
-        val awlreader: InputStream = resources.openRawResource(R.raw.frequentphrasalverbs)
-        val reader: BufferedReader
 
-        reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
+        val phrasalWordReference = baseReferenceForFiles.child("Phrasal Verbs")
 
-        try {
-            while (true) {
-                val line = reader.readLine() ?: break
-                val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
-                val root = tokens[0].toLowerCase(Locale.ROOT)
-                val word = tokens[1].toLowerCase(Locale.ROOT)
+        phrasalWordReference.listAll().addOnSuccessListener { result ->
+            result.items.forEach { item ->
+                // All the items under listRef.
+                val file = File.createTempFile(item.name, "csv")
+                val fileRef = phrasalWordReference.child(item.name)
+                fileRef.getFile(file).addOnSuccessListener {
+                    file.readLines().forEach { line ->
+                        val tokens = line.split(";".toRegex()).dropLastWhile { it.isEmpty() }
+                            .toTypedArray()//Phrasal verb/boşluk gelirse sıçar
 
-                val new_word = Word(word, root)
-                phrasalverbslist.add(new_word)
+                        val word = tokens[1].trimStart().trimEnd()
+                        val root = tokens[0].trimStart().trimEnd()
+
+                        val newWord = Word(word, root)
+
+                        phrasalverbslist.add(newWord)
+                    }
+
+                }
+
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
+
         }
+
     }
 
     private fun readAcademicCollocationList() {
-        val awlreader: InputStream = resources.openRawResource(R.raw.academiccollocation)
-        val reader: BufferedReader
 
-        reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
+        val academicCollocation = baseReferenceForFiles.child("Phrasal Verbs")
 
-        try {
-            while (true) {
-                val line = reader.readLine() ?: break
-                aclwordsList.add(line)
+        academicCollocation.listAll().addOnSuccessListener { result ->
+            result.items.forEach { item ->
+                // All the items under listRef.
+                val file = File.createTempFile(item.name, "csv")
+                val fileRef = academicCollocation.child(item.name)
+                fileRef.getFile(file).addOnSuccessListener {
+                    file.readLines().forEach { line ->
+
+                        aclwordsList.add(line)
+                    }
+
+                }
+
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
+
         }
+
 
     }
 
     private fun readDiscourseConnectorList() {
-        val awlreader = resources.openRawResource(R.raw.discourseconnnector)
-        val reader: BufferedReader
 
-        reader = BufferedReader(InputStreamReader(awlreader, Charset.forName("UTF-8")))
+        val discourseConnectorReference = baseReferenceForFiles.child("Discourse Connector")
 
-        try {
-            while (true) {
-                val line = reader.readLine() ?: break
-                discoursewordslist.add(line)
+        discourseConnectorReference.listAll().addOnSuccessListener { result ->
+            result.items.forEach { item ->
+                // All the items under listRef.
+                val file = File.createTempFile(item.name, "csv")
+                val fileRef = discourseConnectorReference.child(item.name)
+                fileRef.getFile(file).addOnSuccessListener {
+                    file.readLines().forEach { line ->
+
+                        discoursewordslist.add(line)
+                    }
+
+                }
+
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
 
+        }
     }
 
     private fun readEditText(id: Int) {
-        val text = returnedText!!.text.toString().toLowerCase().replace("\\s+".toRegex(), " ").replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
+        val text = returnedText!!.text.toString().toLowerCase(Locale.getDefault())
+            .replace("\\s+".toRegex(), " ")
+            .replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
         val words = text.split("[^A-Za-z]+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         numberofwords = words.size
         wordset.addAll(Arrays.asList(*words))
@@ -490,7 +546,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     }
 
     private fun readEditTextForPhrasalVerbs() {
-        var text = returnedText!!.text.toString().toLowerCase().replace("\\s+".toRegex(), " ").replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
+        var text = returnedText!!.text.toString().toLowerCase().replace("\\s+".toRegex(), " ")
+            .replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
         val words = text.split("[^A-Za-z]+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         numberofwords = words.size
         wordset.addAll(Arrays.asList(*words))
@@ -510,7 +567,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     }
 
     private fun readEditTextStringSet(matched: MutableSet<String>) {
-        var text = returnedText!!.text.toString().toLowerCase().replace("\\s+".toRegex(), " ").replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
+        var text = returnedText!!.text.toString().toLowerCase().replace("\\s+".toRegex(), " ")
+            .replace("[^a-zA-Z\\s]".toRegex(), "").trim { it <= ' ' }
         val words = text.split("[^A-Za-z]+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
         numberofwords = words.size
         wordset.addAll(Arrays.asList(*words))
@@ -527,7 +585,11 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
 
     //region All about voice recording
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
 
@@ -568,7 +630,7 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     override fun onRmsChanged(v: Float) {
         Log.i(LOG_TAG, "onRmsChanged: $v")
-        progressBar!!.progress = v.toInt()
+        (progressBar ?: return).progress = v.toInt()
     }
 
     override fun onBufferReceived(bytes: ByteArray) {
@@ -577,8 +639,8 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
 
     override fun onEndOfSpeech() {
         Log.i(LOG_TAG, "onEndOfSpeech")
-        progressBar!!.isIndeterminate = true
-        toggleButton!!.isChecked = false
+        (progressBar ?: return).isIndeterminate = true
+        (toggleButton ?: return).isChecked = false
         Toast.makeText(this, "Speech ended", Toast.LENGTH_SHORT).show()
     }
 
@@ -593,12 +655,14 @@ class MainActivity : AppCompatActivity(), RecognitionListener {
     override fun onResults(bundle: Bundle) {
         Log.i(LOG_TAG, "onResults")
         val matches = bundle
-                .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
+            .getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
         val text: String
-        text = matches!![0].replace("artı", "+").replace("eksi", "-").replace("noktalı virgül", ";").replace("virgül", ",")
-                .replace("çift nokta", ":").replace("nokta", ".").replace("soru işareti", "?")
-                .replace("Parantez aç", "(").replace("parantez kapat", ")").replace("ünlem", "!").replace("eğik çizgi", "/")
-                .replace("satır başı", "\n   ").replace("Satır başı", "\n   ")
+        text = matches!![0].replace("artı", "+").replace("eksi", "-").replace("noktalı virgül", ";")
+            .replace("virgül", ",")
+            .replace("çift nokta", ":").replace("nokta", ".").replace("soru işareti", "?")
+            .replace("Parantez aç", "(").replace("parantez kapat", ")").replace("ünlem", "!")
+            .replace("eğik çizgi", "/")
+            .replace("satır başı", "\n   ").replace("Satır başı", "\n   ")
         returnedText!!.append(text)
     }
 
